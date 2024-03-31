@@ -108,14 +108,17 @@ publishing {
 
 @SuppressWarnings('GrMethodMayBeStatic')
 def versionMetadata() {
-    // Get the last commit hash and if it's a clean head
+    // Ensure grgit is not null
     if (grgit == null) {
         return '-' + System.getenv("GITHUB_RUN_NUMBER") ? 'build.' + System.getenv("GITHUB_RUN_NUMBER") : 'unknown'
     }
-    // If grgit DOES exist, get tag for this commit
+
+    // Get if there is a tag for this commit
     def tag = grgit.tag.list().find { it.commit.id == grgit.head().id }
     if (tag != null) {
-        return '';
+        return ''
     }
+
+    // Otherwise, get the last commit hash and if it's a clean head
     return '-' + grgit.head().abbreviatedId + (grgit.status().clean ? '' : '-indev')
 }
