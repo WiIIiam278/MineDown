@@ -100,7 +100,7 @@ repositories {
 Then add the dependency:
 ```groovy
 dependencies {
-    implementation 'net.william278:minedown:1.8'
+    implementation 'net.william278:minedown:1.8.2'
 }
 ```
 </details>
