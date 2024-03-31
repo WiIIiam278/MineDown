@@ -3,7 +3,7 @@ name: CI Tests
 
 on:
   push:
-    branches: [ 'master' ]
+    branches: [ 'kyori-adventure' ]
     paths-ignore:
       - 'workflows/**'
       - 'README.md'
@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: 'kyori-adventure'
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
