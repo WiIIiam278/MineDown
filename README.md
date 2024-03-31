@@ -1,4 +1,6 @@
 # MineDown-adventure
+> This fork removes certain features, such as stringification and inline MarkDown-style syntax, and moves it to build with Gradle.
+
 A library that adds the ability to use a MarkDown inspired markup to write Minecraft chat components!
 
 It provides a custom mark up syntax which is loosely based on MarkDown that adds the ability to use the full power of 
@@ -85,59 +87,25 @@ You can easily include this library into your plugin by using maven.
 Make sure to relocate it into your plugin's package!
 
 #### Repository
-```xml
-<repositories>
-    <repository>
-        <id>minebench-repo</id>
-        <url>https://repo.minebench.de/</url>
-    </repository>
-</repositories>
+<details>
+<summary>Adding the library to your project</summary>
+
+First, add the William278 repository to your `build.gradle`:
+```groovy
+repositories {
+    maven { url 'https://repo.william278.net/releases/' }
+}
 ```
 
-#### Artifact
-```xml
-<dependencies>
-    <dependency>
-        <groupId>de.themoep</groupId>
-        <artifactId>minedown-adventure</artifactId>
-        <version>1.7.1-SNAPSHOT</version>
-        <scope>compile</scope>
-    </dependency>
-</dependencies>
+Then add the dependency:
+```groovy
+dependencies {
+    implementation 'net.william278:minedown:1.8'
+}
 ```
+</details>
 
-#### Relocation
-```xml
-<build>
-    <plugins>
-        <plugin>
-            <artifactId>maven-shade-plugin</artifactId>
-            <version>3.1.0</version>
-            <configuration>
-                <relocations>
-                    <relocation>
-                        <pattern>de.themoep.minedown</pattern>
-                        <shadedPattern>your.package.path.libraries.minedown</shadedPattern>
-                    </relocation>
-                </relocations>
-            </configuration>
-            <executions>
-                <execution>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>shade</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-</build>
-```
-
-### Alternative to shading
-
-Alternatively you can also directly depend on my [MineDownPlugin](https://github.com/Phoenix616/MineDownPlugin/) 
-instead of shading in this library! MineDownPlugin includes a non-relocated version of this library.
+Don't forget to relocate!
 
 ## License
 MineDown is licensed under the MIT open source license:
