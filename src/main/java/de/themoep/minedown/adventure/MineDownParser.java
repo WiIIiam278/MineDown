@@ -1,26 +1,26 @@
-package de.themoep.minedown.adventure;
-
 /*
- * Copyright (c) 2020 Max Lee (https://github.com/Phoenix616)
+ * Copyright (c) 2017 Max Lee (https://github.com/Phoenix616)
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
  */
+
+package de.themoep.minedown.adventure;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
@@ -33,28 +33,13 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextFormat;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.PrimitiveIterator;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static de.themoep.minedown.adventure.MineDown.COLOR_PREFIX;
-import static de.themoep.minedown.adventure.MineDown.FONT_PREFIX;
-import static de.themoep.minedown.adventure.MineDown.FORMAT_PREFIX;
-import static de.themoep.minedown.adventure.MineDown.HOVER_PREFIX;
-import static de.themoep.minedown.adventure.MineDown.INSERTION_PREFIX;
+import static de.themoep.minedown.adventure.MineDown.*;
 
 public class MineDownParser {
     private static final String RAINBOW = "rainbow";
@@ -124,6 +109,7 @@ public class MineDownParser {
 
     /**
      * Create a ComponentBuilder by parsing a {@link MineDown} message
+     *
      * @param message The message to parse
      * @return The parsed ComponentBuilder
      * @throws IllegalArgumentException Thrown when a parsing error occurs and lenient is set to false
@@ -148,9 +134,6 @@ public class MineDownParser {
                     }
                 }
             }
-            boolean isFormatting = isEnabled(Option.SIMPLE_FORMATTING)
-                    && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(message, i)
-                    && message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2) != -1;
 
             if (escaped) {
                 escaped = false;
@@ -273,19 +256,6 @@ public class MineDownParser {
                 }
                 i = eventEndIndex + 2 + eventDefinition.length();
                 continue;
-
-                // Simple formatting
-            } else if (isFormatting) {
-                int endIndex = message.indexOf(String.valueOf(c) + String.valueOf(c), i + 2);
-                Map<TextDecoration, Boolean> formats = new HashMap<>(format());
-                if (!isFiltered(Option.SIMPLE_FORMATTING)) {
-                    formats.put(MineDown.getFormatFromChar(c), true);
-                }
-                formattingIsLegacy(false);
-                appendValue();
-                append(copy(true).format(formats).parse(message.substring(i + 2, endIndex)));
-                i = endIndex + 1;
-                continue;
             }
 
             // URL
@@ -374,7 +344,7 @@ public class MineDownParser {
             builder.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, v));
             if (urlHoverText() != null && !urlHoverText().isEmpty()) {
                 builder.hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new MineDown(urlHoverText()).replace("url", value.toString()).toComponent()
+                        new MineDown(urlHoverText()).toComponent()
                 ));
             }
         }
@@ -413,6 +383,7 @@ public class MineDownParser {
 
     /**
      * Parse a {@link MineDown} event string
+     *
      * @param text        The display text
      * @param definitions The event definition string
      * @return The parsed ComponentBuilder for this string
@@ -543,7 +514,7 @@ public class MineDownParser {
                         if (!additionalParts[0].contains(":")) {
                             additionalParts[0] = "minecraft:" + additionalParts[0];
                         }
-                        hoverEvent = HoverEvent.showEntity(HoverEvent.ShowEntity.of(
+                        hoverEvent = HoverEvent.showEntity(HoverEvent.ShowEntity.showEntity(
                                 Key.key(additionalParts[0]), UUID.fromString(valueParts[0]),
                                 additionalParts.length > 1 && additionalParts[1] != null ?
                                         copy(false).urlDetection(false).parse(additionalParts[1]).build() : null
@@ -576,13 +547,11 @@ public class MineDownParser {
                     }
                     BinaryTagHolder tag = null;
                     if (valueParts.length > 1 && valueParts[1] != null) {
-                        tag = BinaryTagHolder.of(valueParts[1]);
+                        tag = BinaryTagHolder.binaryTagHolder(valueParts[1]);
                     }
 
                     try {
-                        hoverEvent = HoverEvent.showItem(HoverEvent.ShowItem.of(
-                                Key.key(id), count, tag
-                        ));
+                        hoverEvent = HoverEvent.showItem(HoverEvent.ShowItem.showItem(Key.key(id), count, tag));
                     } catch (Exception e) {
                         if (!lenient()) {
                             throw new IllegalArgumentException(e.getMessage());
@@ -656,7 +625,7 @@ public class MineDownParser {
         return value.toString();
     }
 
-    protected ComponentBuilder<?,?> builder() {
+    protected ComponentBuilder<?, ?> builder() {
         return this.builder;
     }
 
@@ -678,6 +647,7 @@ public class MineDownParser {
         this.font = font;
         return this;
     }
+
     protected String font() {
         return this.font;
     }
@@ -762,6 +732,7 @@ public class MineDownParser {
 
     /**
      * Parse a color/format definition
+     *
      * @param colorString The string to parse
      * @param prefix      The color prefix e.g. ampersand (&amp;)
      * @param lenient     Whether or not to accept malformed strings
@@ -809,6 +780,7 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's setting to a new instance
+     *
      * @return The new parser instance with all settings copied
      */
     public MineDownParser copy() {
@@ -817,6 +789,7 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's setting to a new instance
+     *
      * @param formatting Should the formatting be copied too?
      * @return The new parser instance with all settings copied
      */
@@ -826,6 +799,7 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's settings from another parser.
+     *
      * @param from The parser to copy from
      * @return This parser's instance
      */
@@ -835,6 +809,7 @@ public class MineDownParser {
 
     /**
      * Copy all the parser's settings from another parser.
+     *
      * @param from       The parser to copy from
      * @param formatting Should the formatting be copied too?
      * @return This parser's instance
@@ -861,6 +836,7 @@ public class MineDownParser {
 
     /**
      * Reset the parser state to the start
+     *
      * @return The parser's instance
      */
     public MineDownParser reset() {
@@ -878,6 +854,7 @@ public class MineDownParser {
 
     /**
      * Whether or not to translate legacy color codes (Default: true)
+     *
      * @return Whether or not to translate legacy color codes (Default: true)
      * @deprecated Use {@link #isEnabled(Option)} instead
      */
@@ -888,6 +865,7 @@ public class MineDownParser {
 
     /**
      * Whether or not to translate legacy color codes
+     *
      * @return The parser
      * @deprecated Use {@link #enable(Option)} and {@link #disable(Option)} instead
      */
@@ -898,6 +876,7 @@ public class MineDownParser {
 
     /**
      * Check whether or not an option is enabled
+     *
      * @param option The option to check for
      * @return <code>true</code> if it's enabled; <code>false</code> if not
      */
@@ -907,6 +886,7 @@ public class MineDownParser {
 
     /**
      * Enable an option.
+     *
      * @param option The option to enable
      * @return The parser instace
      */
@@ -919,6 +899,7 @@ public class MineDownParser {
      * Disable an option. Disabling an option will stop the parser from replacing
      * this option's chars in the string. Use {@link #filter(Option)} to completely
      * remove the characters used by this option from the message instead.
+     *
      * @param option The option to disable
      * @return The parser instace
      */
@@ -929,6 +910,7 @@ public class MineDownParser {
 
     /**
      * Check whether or not an option is filtered
+     *
      * @param option The option to check for
      * @return <code>true</code> if it's enabled; <code>false</code> if not
      */
@@ -939,6 +921,7 @@ public class MineDownParser {
     /**
      * Filter an option. This enables the parsing of an option and completely
      * removes the characters of this option from the string.
+     *
      * @param option The option to add to the filter
      * @return The parser instance
      */
@@ -950,6 +933,7 @@ public class MineDownParser {
 
     /**
      * Unfilter an option. Does not enable it!
+     *
      * @param option The option to remove from the filter
      * @return The parser instance
      */
@@ -960,6 +944,7 @@ public class MineDownParser {
 
     /**
      * Escape formatting in the string depending on this parser's options. This will escape backslashes too!
+     *
      * @param string The string to escape
      * @return The string with all formatting of this parser escaped
      */
@@ -973,10 +958,8 @@ public class MineDownParser {
                     && i + 1 < string.length() && (c == '§' || c == colorChar());
             boolean isEvent = isEnabled(Option.ADVANCED_FORMATTING)
                     && c == '[';
-            boolean isFormatting = isEnabled(Option.SIMPLE_FORMATTING)
-                    && (c == '_' || c == '*' || c == '~' || c == '?' || c == '#') && Util.isDouble(string, i);
 
-            if (isEscape || isColorCode || isEvent || isFormatting) {
+            if (isEscape || isColorCode || isEvent) {
                 value.append('\\');
             }
             value.append(c);
@@ -990,17 +973,18 @@ public class MineDownParser {
          */
         SIMPLE_FORMATTING,
         /**
-         * Translate advanced MineDown formatting (e.g. events) in strings? (Default: true)
+         * Translate advanced MineDown formatting (e.g., events) in strings? (Default: true)
          */
         ADVANCED_FORMATTING,
         /**
-         * Whether or not to translate legacy color codes (Default: true)
+         * Whether to translate legacy color codes (Default: true)
          */
         LEGACY_COLORS
     }
 
     /**
      * Get The character to use as a special color code.
+     *
      * @return The color character (Default: ampersand &amp;)
      */
     public char colorChar() {
@@ -1009,6 +993,7 @@ public class MineDownParser {
 
     /**
      * Set the character to use as a special color code.
+     *
      * @param colorChar The color char (Default: ampersand &amp;)
      * @return The MineDownParser instance
      */
@@ -1019,6 +1004,7 @@ public class MineDownParser {
 
     /**
      * Get all enabled options that will be used when parsing
+     *
      * @return a modifiable set of options
      */
     public Set<Option> enabledOptions() {
@@ -1027,6 +1013,7 @@ public class MineDownParser {
 
     /**
      * Set all enabled options that will be used when parsing at once, replaces any existing options
+     *
      * @param enabledOptions The enabled options
      * @return The MineDownParser instance
      */
@@ -1037,6 +1024,7 @@ public class MineDownParser {
 
     /**
      * Get all filtered options that will be parsed and then removed from the string
+     *
      * @return a modifiable set of options
      */
     public Set<Option> filteredOptions() {
@@ -1046,6 +1034,7 @@ public class MineDownParser {
     /**
      * Set all filtered options that will be parsed and then removed from the string at once,
      * replaces any existing options
+     *
      * @param filteredOptions The filtered options
      * @return The MineDownParser instance
      */
@@ -1056,6 +1045,7 @@ public class MineDownParser {
 
     /**
      * Get whether to accept malformed strings or not
+     *
      * @return whether or not the accept malformed strings (Default: false)
      */
     public boolean lenient() {
@@ -1064,6 +1054,7 @@ public class MineDownParser {
 
     /**
      * Set whether to accept malformed strings or not
+     *
      * @param lenient Set whether or not to accept malformed string (Default: false)
      * @return The MineDownParser instance
      */
@@ -1074,6 +1065,7 @@ public class MineDownParser {
 
     /**
      * Get whether or not urls in strings are detected and get events added to them?
+     *
      * @return whether or not urls are detected (Default: true)
      */
     public boolean urlDetection() {
@@ -1082,6 +1074,7 @@ public class MineDownParser {
 
     /**
      * Set whether or not to detect urls in strings and add events to them?
+     *
      * @param urlDetection Whether or not to detect urls in strings  (Default: true)
      * @return The MineDownParser instance
      */
@@ -1099,6 +1092,7 @@ public class MineDownParser {
 
     /**
      * Set the text to display when hovering over an URL. Has a %url% placeholder.
+     *
      * @param urlHoverText The url hover text
      * @return The MineDownParser instance
      */
@@ -1109,6 +1103,7 @@ public class MineDownParser {
 
     /**
      * Get whether or not to automatically add http to values of open_url when there doesn't exist any?
+     *
      * @return whether or not to automatically add http to values of open_url when there doesn't exist any? (Default: true)
      */
     public boolean autoAddUrlPrefix() {
@@ -1117,6 +1112,7 @@ public class MineDownParser {
 
     /**
      * Set whether or not to automatically add http to values of open_url when there doesn't exist any?
+     *
      * @param autoAddUrlPrefix Whether or not automatically add http to values of open_url when there doesn't exist any? (Default: true)
      * @return The MineDownParser instance
      */
@@ -1138,6 +1134,7 @@ public class MineDownParser {
      * Set the max width the hover text should have.
      * Minecraft itself will wrap after 60 characters.
      * Won't apply if the text already includes new lines.
+     *
      * @param hoverTextWidth The url hover text length
      * @return The MineDownParser instance
      */

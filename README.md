@@ -3,7 +3,6 @@ A library that adds the ability to use a MarkDown inspired markup to write Minec
 
 It provides a custom mark up syntax which is loosely based on MarkDown that adds the ability to use the full power of 
 component messages with the same simplicity as legacy formatting codes. (Which it can still support!)
-It also includes a way to directly replace placeholders in the messages, both string based and component based ones!
 
 This requires the [kyori-adventure](https://github.com/KyoriPowered/adventure) chat API so you need to provide one of 
 the [platform libraries](https://github.com/KyoriPowered/adventure-platform) in your project in order to use these
@@ -12,20 +11,15 @@ messages! See [this plugin](https://github.com/Phoenix616/MineDownPlugin/tree/ky
 ## Syntax
 
 ### Inline Formatting
- Description   | Syntax             | More Info                                                             | Preview
- --------------|--------------------|-----------------------------------------------------------------------|-------------------------------------------
- Color legacy  |` &6Text           `| [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes)  | ![](https://i.phoenix616.dev/gbJYVeql.png)
- Color         |` &gold&Text       `| [Color names](https://minecraft.gamepedia.com/Formatting_codes)       | ![](https://i.phoenix616.dev/gfgApGrn.png)
- RGB Hex Color |` &#ff00ff&Text    `| Full hexadecimal format                                               | ![](https://i.phoenix616.dev/glFV9zgw.png)
- RGB Hex Color |` &#f0f&Text       `| Short format (equivalent to long one)                                 | ![](https://i.phoenix616.dev/gojZlSaN.png)
- Gradient      |` &#f0f-#fff&Text  `| Inline gradients                                                      | ![](https://i.phoenix616.dev/giOQuXV6.png)
- Rainbow       |` &rainbow&Text    `| Inline Rainbow                                                        | ![](https://i.phoenix616.dev/ggYaEWZt.png)
- Rainbow Phase |` &rainbow:20&Text `| Inline Rainbow with a phase                                           | ![](https://i.phoenix616.dev/gojDf1ZM.png)
- Bold          |` **Text**         `|                                                                       | ![](https://i.phoenix616.dev/fYDs0soW.png)
- Italic        |` ##Text##         `|                                                                       | ![](https://i.phoenix616.dev/gaLmjWZA.png)
- Underlined    |` __Text__         `|                                                                       | ![](https://i.phoenix616.dev/gk6lbR0B.png)
- Strikethrough |` ~~Text~~         `|                                                                       | ![](https://i.phoenix616.dev/gpc5zBr4.png)
- Obfuscated    |` ??Text??         `|                                                                       | ![](https://i.phoenix616.dev/giRU4C9u.gif)
+| Description   | Syntax               | More Info                                                            | Preview                                    |
+|---------------|----------------------|----------------------------------------------------------------------|--------------------------------------------|
+| Color legacy  | ` &6Text           ` | [Formatting codes](https://minecraft.gamepedia.com/Formatting_codes) | ![](https://i.phoenix616.dev/gbJYVeql.png) |
+| Color         | ` &gold&Text       ` | [Color names](https://minecraft.gamepedia.com/Formatting_codes)      | ![](https://i.phoenix616.dev/gfgApGrn.png) |
+| RGB Hex Color | ` &#ff00ff&Text    ` | Full hexadecimal format                                              | ![](https://i.phoenix616.dev/glFV9zgw.png) |
+| RGB Hex Color | ` &#f0f&Text       ` | Short format (equivalent to long one)                                | ![](https://i.phoenix616.dev/gojZlSaN.png) |
+| Gradient      | ` &#f0f-#fff&Text  ` | Inline gradients                                                     | ![](https://i.phoenix616.dev/giOQuXV6.png) |
+| Rainbow       | ` &rainbow&Text    ` | Inline Rainbow                                                       | ![](https://i.phoenix616.dev/ggYaEWZt.png) |
+| Rainbow Phase | ` &rainbow:20&Text ` | Inline Rainbow with a phase                                          | ![](https://i.phoenix616.dev/gojDf1ZM.png) |
 
 ### Events ###
 You can define click and hover events with the commonly used MarkDown link syntax

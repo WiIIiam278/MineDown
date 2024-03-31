@@ -1,26 +1,26 @@
-package de.themoep.minedown.adventure;
-
 /*
- * Copyright (c) 2020 Max Lee (https://github.com/Phoenix616)
+ * Copyright (c) 2017 Max Lee (https://github.com/Phoenix616)
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
  */
+
+package de.themoep.minedown.adventure;
 
 import net.kyori.adventure.text.BuildableComponent;
 import net.kyori.adventure.text.Component;
@@ -30,50 +30,15 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextFormat;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.awt.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Util {
 
     private static final Pattern WRAP_PATTERN = Pattern.compile(" ", Pattern.LITERAL);
-
-    /**
-     * Utility method to throw an IllegalArgumentException if the value is false
-     * @param value   The value to validate
-     * @param message The message for the exception
-     * @throws IllegalArgumentException Thrown if the value is false
-     */
-    public static void validate(boolean value, String message) throws IllegalArgumentException {
-        if (!value) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    /**
-     * Apply a collection of colors/formats to a component
-     * @param component The BaseComponent
-     * @param formats   The collection of TextColor formats to apply
-     * @return The component that was modified
-     */
-    public static Component applyFormat(Component component, Collection<TextDecoration> formats) {
-        for (TextDecoration format : formats) {
-            component.decoration(format, true);
-        }
-        if (!component.children().isEmpty()) {
-            for (Component extra : component.children()) {
-                applyFormat(extra, formats);
-            }
-        }
-        return component;
-    }
 
     /**
      * Apply a collection of colors/formats to a component builder
@@ -101,68 +66,6 @@ public class Util {
             builder.decoration(e.getKey(), e.getValue());
         }
         return builder;
-    }
-
-    /**
-     * Check whether or not a character at a certain index of a string repeats itself
-     * @param string The string to check
-     * @param index  The index at which to check the character
-     * @return Whether or not the character at that index repeated itself
-     */
-    public static boolean isDouble(String string, int index) {
-        return index + 1 < string.length() && string.charAt(index) == string.charAt(index + 1);
-    }
-
-    /**
-     * Check whether a certain TextColor is formatting or not
-     * @param format The TextColor to check
-     * @return <code>true</code> if it's a format, <code>false</code> if it's a color
-     */
-    public static boolean isFormat(TextColor format) {
-        return false;
-    }
-
-    /**
-     * Get a set of TextColor formats all formats that a component includes
-     * @param component    The component to get the formats from
-     * @param ignoreParent Whether or not to include the parent's format (TODO: Does kyori-text not handle this?)
-     * @return A set of all the format TextColors that the component includes
-     */
-    public static Set<TextDecoration> getFormats(Component component, boolean ignoreParent) {
-        return component.decorations().entrySet().stream()
-                .filter(e -> e.getValue() == TextDecoration.State.TRUE)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
-    }
-
-    /**
-     * Get the index of the first occurrences of a not escaped character
-     * @param string The string to search
-     * @param chars  The characters to search for
-     * @return The first unescaped index or -1 if not found
-     */
-    public static int indexOfNotEscaped(String string, String chars) {
-        return indexOfNotEscaped(string, chars, 0);
-    }
-
-    /**
-     * Get the index of the first occurrences of a not escaped character
-     * @param string    The string to search
-     * @param chars     The characters to search for
-     * @param fromIndex Start searching from that index
-     * @return The first unescaped index or {@code -1} if not found
-     */
-    public static int indexOfNotEscaped(String string, String chars, int fromIndex) {
-        for (int i = fromIndex; i < string.length(); i++) {
-            int index = string.indexOf(chars, i);
-            if (index == -1) {
-                return -1;
-            }
-            if (!isEscaped(string, index)) {
-                return index;
-            }
-        }
-        return -1;
     }
 
     /**
@@ -251,19 +154,6 @@ public class Util {
             lines.add(currentLine.toString());
         }
         return String.join("\n", lines);
-    }
-
-    /**
-     * Utility method to remove RGB colors from components. This modifies the input array!
-     * @param components    The components to remove the rgb colors from
-     * @return The modified components (same as input).
-     */
-    public static Component rgbColorsToLegacy(Component components) {
-        return Component.text().append(components).mapChildrenDeep(buildableComponent
-                -> buildableComponent.color() != null
-                        ? (BuildableComponent) buildableComponent.color(NamedTextColor.nearestTo(buildableComponent.color()))
-                        : buildableComponent
-        ).build();
     }
 
     /**
@@ -362,7 +252,9 @@ public class Util {
             return getLegacyFormatChar(NamedTextColor.nearestTo((TextColor) format));
         }
         throw new IllegalArgumentException(format + " is not supported!");
-    }    /*
+    }
+
+    /*
      * createRainbow is adapted from the net.kyori.adventure.text.minimessage.fancy.Rainbow class
      * in adventure-text-minimessage, licensed under the MIT License.
      *
