@@ -180,6 +180,20 @@ public class MineDownParser {
                     colorString.append(c1);
                 }
                 if (rainbowPhase == null && encoded == null) {
+                    // Legacy reset is not an Adventure TextFormat. That interface is sealed.
+                    if (code == 'r') {
+                        filterOption = Option.LEGACY_COLORS;
+                        if (!isFiltered(filterOption)) {
+                            if (builder() == null && ((format() != null && !format().isEmpty()) || (colors() != null && !colors().isEmpty()))) {
+                                builder(Component.text());
+                            }
+                            appendValue();
+                            colors(new LinkedHashMap<>());
+                            rainbowPhase(null);
+                            format(new HashMap<>());
+                        }
+                        continue;
+                    }
                     TextFormat format = Util.getFormatFromLegacy(code);
                     if (format != null) {
                         filterOption = Option.LEGACY_COLORS;
@@ -192,15 +206,7 @@ public class MineDownParser {
                     if (!isFiltered(filterOption)) {
                         if (encoded != null && encoded.size() == 1) {
                             Map.Entry<TextFormat, Boolean> single = encoded.entrySet().iterator().next();
-                            if (single.getKey() == Util.TextControl.RESET) {
-                                if (builder() == null && ((format() != null && !format().isEmpty()) || (colors() != null && !colors().isEmpty()))) {
-                                    builder(Component.text());
-                                }
-                                appendValue();
-                                colors(new LinkedHashMap<>());
-                                rainbowPhase(null);
-                                format(new HashMap<>());
-                            } else if (single.getKey() instanceof TextColor) {
+                            if (single.getKey() instanceof TextColor) {
                                 if (value().length() > 0) {
                                     if (builder() == null && format() != null && !format().isEmpty()) {
                                         builder(Component.text());
@@ -341,7 +347,7 @@ public class MineDownParser {
             if (!v.startsWith("http://") && !v.startsWith("https://")) {
                 v = "http://" + v;
             }
-            builder.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, v));
+            builder.clickEvent(ClickEvent.openUrl(v));
             if (urlHoverText() != null && !urlHoverText().isEmpty()) {
                 builder.hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new MineDown(urlHoverText()).toComponent()
@@ -403,6 +409,7 @@ public class MineDownParser {
         String insertion = null;
         Map<TextDecoration, Boolean> formats = new HashMap<>();
         ClickEvent clickEvent = null;
+        String clickValue = null;
         HoverEvent hoverEvent = null;
 
         int formatEnd = -1;
@@ -475,32 +482,49 @@ public class MineDownParser {
                 if (!definition.startsWith("http://") && !definition.startsWith("https://")) {
                     definition = "http://" + definition;
                 }
-                clickEvent = ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, definition);
+                clickEvent = ClickEvent.openUrl(definition);
+                clickValue = definition;
                 continue;
             }
 
-            ClickEvent.Action clickAction = definition.startsWith("/") ? ClickEvent.Action.RUN_COMMAND : null;
+            ClickEvent.Action clickAction = definition.startsWith("/") ? ClickEvent.Action.NAMES.value("run_command") : null;
             HoverEvent.Action hoverAction = null;
             if (definition.toLowerCase(Locale.ROOT).startsWith(HOVER_PREFIX)) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
             String[] parts = definition.split("=", 2);
-            try {
-                hoverAction = HoverEvent.Action.NAMES.value(parts[0].toLowerCase(Locale.ROOT));
-            } catch (IllegalArgumentException ignored) {
-            }
-            try {
-                clickAction = ClickEvent.Action.valueOf(parts[0].toUpperCase(Locale.ROOT));
-            } catch (IllegalArgumentException ignored) {
+            String actionKey = parts[0].toLowerCase(Locale.ROOT);
+            hoverAction = HoverEvent.Action.NAMES.value(actionKey);
+            ClickEvent.Action namedClick = ClickEvent.Action.NAMES.value(actionKey);
+            if (namedClick != null) {
+                clickAction = namedClick;
             }
 
             String valueStr = getValue(i, parts.length > 1 ? parts[1] : "", defParts, clickAction != null || hoverAction != null);
 
             if (clickAction != null) {
-                if (autoAddUrlPrefix() && clickAction == ClickEvent.Action.OPEN_URL && !valueStr.startsWith("http://") && !valueStr.startsWith("https://")) {
-                    valueStr = "http://" + valueStr;
+                String actionName = clickAction.toString();
+                ClickEvent parsedClick = null;
+                if ("open_url".equals(actionName)) {
+                    if (autoAddUrlPrefix() && !valueStr.startsWith("http://") && !valueStr.startsWith("https://")) {
+                        valueStr = "http://" + valueStr;
+                    }
+                    parsedClick = ClickEvent.openUrl(valueStr);
+                } else if ("open_file".equals(actionName)) {
+                    parsedClick = ClickEvent.openFile(valueStr);
+                } else if ("run_command".equals(actionName)) {
+                    parsedClick = ClickEvent.runCommand(valueStr);
+                } else if ("suggest_command".equals(actionName)) {
+                    parsedClick = ClickEvent.suggestCommand(valueStr);
+                } else if ("change_page".equals(actionName)) {
+                    parsedClick = ClickEvent.changePage(Integer.parseInt(valueStr));
+                } else if ("copy_to_clipboard".equals(actionName)) {
+                    parsedClick = ClickEvent.copyToClipboard(valueStr);
                 }
-                clickEvent = ClickEvent.clickEvent(clickAction, valueStr);
+                if (parsedClick != null) {
+                    clickEvent = parsedClick;
+                    clickValue = valueStr;
+                }
             } else if (hoverAction == null) {
                 hoverAction = HoverEvent.Action.SHOW_TEXT;
             }
@@ -566,7 +590,7 @@ public class MineDownParser {
                     Component.text()
                             .append(Component.text(clickEvent.action().toString().toLowerCase(Locale.ROOT).replace('_', ' ')))
                             .color(NamedTextColor.BLUE)
-                            .append(Component.text(" " + clickEvent.value())).color(NamedTextColor.WHITE)
+                            .append(Component.text(" " + clickValue)).color(NamedTextColor.WHITE)
                             .build());
         }
 
