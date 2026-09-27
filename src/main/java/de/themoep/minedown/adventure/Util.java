@@ -210,7 +210,6 @@ public class Util {
             case 'm': return TextDecoration.STRIKETHROUGH;
             case 'n': return TextDecoration.UNDERLINED;
             case 'o': return TextDecoration.ITALIC;
-            case 'r': return TextControl.RESET;
         }
         return null;
     }
@@ -221,9 +220,7 @@ public class Util {
      * @return          The legacy color code or null if none found with that char
      */
     public static char getLegacyFormatChar(TextFormat format) {
-        if (format == TextControl.RESET) {
-            return 'r';
-        } else if (format instanceof NamedTextColor) {
+        if (format instanceof NamedTextColor) {
                 if (format == NamedTextColor.BLACK) return '0';
                 if (format == NamedTextColor.DARK_BLUE) return '1';
                 if (format == NamedTextColor.DARK_GREEN) return '2';
@@ -396,19 +393,5 @@ public class Util {
         }
 
         return colors;
-    }
-
-    public enum TextControl implements TextFormat {
-        RESET('r');
-
-        private char c;
-
-        TextControl(char c) {
-            this.c = c;
-        }
-
-        public char getChar() {
-            return c;
-        }
     }
 }
